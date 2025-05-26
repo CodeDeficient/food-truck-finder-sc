@@ -1,0 +1,67 @@
+# Node / Bun / pnpm
+node_modules/
+bun.lockb
+yarn.lock
+pnpm-lock.yaml
+package-lock.json
+
+# Next.js
+.next/
+out/
+
+# Environment variables
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+!.env.ci
+
+# Firebase
+# If you were to ever download service account keys (typically not for client-side or Functions deployed via Firebase CLI)
+# *.json (if it's a service account key, be more specific if possible or ensure they are never in the repo)
+# For Firebase emulators
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+pubsub-debug.log
+database-debug.log
+storage-debug.log
+
+# IDE specific
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS specific
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Build artifacts & Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+logs
+*.log.*
+*.pid
+*.seed
+*.pid.lock
+lib-cov
+coverage
+*.lcov
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# Capacitor (for future use)
+android/
+ios/
+www/ # if Capacitor is configured to use this as webDir instead of 'out'

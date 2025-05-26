@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SC Food Truck Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzxHjDZaLEFPKNGwtXKHzSyJzI=" crossorigin="" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1a1a1a 0%, #000000 70%); /* Subtle radial gradient for depth */
+            color: #f9fafb; /* gray-50 */
+        }
+        /* Enhanced black metallic glassmorphism effect */
+        .glass-panel {
+            background-color: rgba(5, 5, 5, 0.75); /* Even darker, slightly more opaque for solid metallic feel */
+            backdrop-filter: blur(30px) saturate(200%) brightness(120%); /* Stronger blur, saturation, and slight brightness for sheen */
+            -webkit-backdrop-filter: blur(30px) saturate(200%) brightness(120%); /* Safari support */
+            border: 1px solid rgba(255, 255, 255, 0.25); /* More visible, subtle white border for reflection */
+            box-shadow:
+                0 18px 70px 0 rgba(0, 0, 0, 0.95), /* Deeper outer shadow for floating effect */
+                inset 0 0 0 1px rgba(255, 255, 255, 0.1), /* Subtle inner highlight */
+                inset 0 0 30px rgba(255, 255, 255, 0.03); /* Very subtle inner glow */
+            border-radius: 20px; /* Even more rounded for sleekness */
+            transition: all 0.3s ease-in-out; /* Smooth transitions for hover effects */
+            position: relative; /* Needed for pseudo-elements */
+            overflow: hidden; /* Ensure content respects border-radius for the panel itself */
+        }
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.08) 100%); /* More pronounced light streak */
+            pointer-events: none; /* Allow clicks to pass through */
+            z-index: -1; /* Behind content */
+            opacity: 0.8; /* Control visibility of the sheen */
+        }
+        .glass-panel:hover {
+            box-shadow:
+                0 25px 80px 0 rgba(0, 0, 0, 1),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+                inset 0 0 40px rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px); /* Slight lift on hover */
+        }
+
+        #map {
+            height: 40vh; /* Responsive height for map */
+            width: 100%;
+            border-radius: 18px; /* Slightly less than glass-panel to ensure it fits within its rounded corners */
+            border: 2px solid #b91c1c; /* red-700 */
+        }
+        .truck-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .truck-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 35px rgba(56, 178, 172, 0.9), 0 0 20px rgba(56, 178, 172, 0.7); /* Stronger neon glow */
+            border-color: #38b2ac; /* cyan-400 equivalent for hover glow */
+        }
+        .filter-button {
+            background-color: #b91c1c; /* red-700 */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px; /* rounded-full */
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            border: 1px solid transparent; /* Ensure consistent border */
+            flex-shrink: 0; /* Prevent buttons from shrinking */
+            position: relative; /* Needed for z-index to work */
+            z-index: 20; /* Ensure buttons are above the scrollbar */
+        }
+        .filter-button:hover {
+            background-color: #dc2626; /* red-600 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        .filter-button.active {
+            background-color: #38b2ac; /* cyan-400 */
+            color: #0c0a09; /* gray-950 */
+            /* Adjusted box-shadow spread and offset for better visibility and less clipping */
+            box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.5), /* Inner glow for border effect */
+                        0 0 20px rgba(56, 178, 172, 0.9); /* Outer glow for active state */
+            border-color: #38b2ac; /* Active border color */
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            padding: 0.5rem;
+            color: #f9fafb; /* gray-50 */
+            transition: color 0.2s ease-in-out;
+        }
+        .bottom-nav-item:hover {
+            color: #38b2ac; /* cyan-400 */
+        }
+        .bottom-nav-item.active {
+            color: #b91c1c; /* red-700 */
+            font-weight: 600;
+        }
+        .bottom-nav-item .icon {
+            width: 1.5rem; /* Set explicit width for SVG icons */
+            height: 1.5rem; /* Set explicit height for SVG icons */
+            fill: currentColor; /* Allows SVG to inherit text color */
+            margin-bottom: 0.25rem;
+        }
+        /* Style for SVG icons to inherit color */
+        .svg-icon {
+            fill: currentColor;
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        .header-icon {
+            fill: currentColor;
+            width: 1.75rem; /* Slightly larger for header */
+            height: 1.75rem;
+        }
+        .truck-icon {
+            fill: currentColor;
+            width: 2.5rem; /* Larger for truck cards */
+            height: 2.5rem;
+        }
+        /* Specific styling for the search input to match glassmorphism */
+        .search-input {
+            background-color: rgba(30, 30, 30, 0.7); /* Slightly more opaque for input */
+            border: 2px solid #b91c1c; /* red-700 */
+            color: white;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6); /* Inner shadow for depth */
+        }
+        .search-input:focus {
+            border-color: #38b2ac; /* neon blue focus */
+            box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.6), inset 0 0 8px rgba(56, 178, 172, 0.4); /* subtle neon glow on focus */
+        }
+
+        /* Custom Scrollbar Styling for Webkit browsers (Chrome, Edge, Safari) */
+        .scrollable-filters-container::-webkit-scrollbar {
+            width: 8px; /* Width for vertical scrollbar */
+            height: 8px; /* Height for horizontal scrollbar */
+        }
+
+        .scrollable-filters-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.01); /* Even more subtle track */
+            border-radius: 10px;
+        }
+
+        .scrollable-filters-container::-webkit-scrollbar-thumb {
+            background: rgba(56, 178, 172, 0.4); /* Solid, but translucent neon blue for thumb */
+            border-radius: 10px;
+            border: none; /* Ensure no conflicting border */
+            box-shadow: none; /* Remove box-shadow from thumb itself to avoid conflicts */
+            transition: background 0.2s ease-in-out; /* Transition only background */
+        }
+
+        .scrollable-filters-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 178, 172, 0.7); /* More opaque on hover for solid feel */
+        }
+        /* Fix for scrollbar pushing content and button clipping */
+        .scrollable-filters-container {
+            overflow-x: auto;
+            padding-bottom: 30px; /* Increased padding to give more space below the buttons for their glow */
+            padding-top: 24px; /* Increased padding to the top of the scrollable container for button glow */
+            padding-left: 1rem; /* Add padding to the scrollable container itself */
+            padding-right: 1rem; /* Add padding to the scrollable container itself */
+            margin-left: -1rem; /* Compensate for the glass-panel's padding */
+            margin-right: -1rem; /* Compensate for the glass-panel's padding */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div class="flex-1 flex flex-col">
+        <header class="glass-panel p-4 flex items-center justify-between relative z-10 rounded-none md:rounded-b-xl">
+            <button class="text-white text-2xl p-2 rounded-md hover:text-blue-400 transition-colors">
+                <svg class="header-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+            </button>
+            <div class="relative flex-1 mx-4">
+                <input type="text" placeholder="Search food trucks..." class="w-full p-2 pl-10 rounded-xl search-input focus:outline-none">
+                <svg class="header-icon absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+            </div>
+            <button class="text-white text-2xl p-2 rounded-md hover:text-blue-400 transition-colors">
+                <svg class="header-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+            </button>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-6">
+            <h1 class="text-3xl font-bold text-center text-red-700 mb-6 tracking-wide">SC Food Truck Finder</h1>
+
+            <section class="mb-8 glass-panel p-4">
+                <div id="map" class="rounded-xl border-2 border-red-700 shadow-xl"></div>
+            </section>
+
+            <section class="mb-8 glass-panel p-4">
+                <h2 class="text-xl font-semibold text-white mb-3">Filter by Cuisine</h2>
+                <div class="scrollable-filters-container">
+                    <div id="cuisineFilters" class="flex space-x-3 whitespace-nowrap">
+                        <button class="filter-button active" data-cuisine="all">All</button>
+                        <button class="filter-button" data-cuisine="mexican">Mexican</button>
+                        <button class="filter-button" data-cuisine="bbq">BBQ</button>
+                        <button class="filter-button" data-cuisine="vegan">Vegan</button>
+                        <button class="filter-button" data-cuisine="asian">Asian</button>
+                        <button class="filter-button" data-cuisine="dessert">Dessert</button>
+                        <button class="filter-button" data-cuisine="burgers">Burgers</button>
+                        <button class="filter-button" data-cuisine="seafood">Seafood</button>
+                        <button class="filter-button" data-cuisine="italian">Italian</button>
+                        <button class="filter-button" data-cuisine="coffee">Coffee</button>
+                        <button class="filter-button" data-cuisine="sandwiches">Sandwiches</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="glass-panel p-4">
+                <h2 class="text-2xl font-semibold text-white mb-4">Trucks Nearby</h2>
+                <div id="truckList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+            </section>
+        </main>
+
+        <nav class="glass-panel p-2 flex justify-around border-t-2 border-red-700 shadow-lg z-10 rounded-none md:rounded-t-xl">
+            <a href="#" class="bottom-nav-item active">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                <span>Map</span>
+            </a>
+            <a href="#" class="bottom-nav-item">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22 9V7h-2V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v2H2v2h2v4H2v2h2v2c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-2h2v-2h-2V9h2zm-4 10H6V5h12v14zM9 8h6v2H9zm0 4h6v2H9z"/>
+                </svg>
+                <span>Trucks</span>
+            </a>
+            <a href="#" class="bottom-nav-item">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <span>Favorites</span>
+            </a>
+            <a href="#" class="bottom-nav-item">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20n6qqzJRzpfW9HtU8wQ/zD/MTfK52rPN7S/yF7y2tQ=" crossorigin=""></script>
+    <script>
+        let map;
+        let markers = [];
+
+        const foodTrucksData = [
+            { id: 't1', name: 'The Taco Truck', cuisine: 'Mexican', status: 'Open Now', location: [33.9988, -81.0450], description: 'Authentic street tacos and burritos. Find us near the Capitol building today!', image: 'taco' },
+            { id: 't2', name: 'Smokin\' BBQ Pit', cuisine: 'BBQ', status: 'Open Now', location: [33.9000, -81.1500], description: 'Slow-smoked pulled pork and brisket. Catch us at the park!', image: 'bbq' },
+            { id: 't3', name: 'Green Goodness', cuisine: 'Vegan', status: 'Closed', location: [34.0000, -80.9000], description: 'Fresh plant-based bowls and smoothies. Back tomorrow!', image: 'salad' },
+            { id: 't4', name: 'Wok & Roll', cuisine: 'Asian', status: 'Open Now', location: [33.8500, -81.0000], description: 'Delicious stir-fries and noodles. Perfect for a quick lunch!', image: 'noodles' },
+            { id: 't5', name: 'Sweet Treats', cuisine: 'Dessert', status: 'Open Now', location: [34.0500, -80.9500], description: 'Cupcakes, cookies, and ice cream. Indulge your sweet tooth!', image: 'icecream' },
+            { id: 't6', name: 'Burger Bliss', cuisine: 'Burgers', status: 'Open Now', location: [33.7500, -81.2000], description: 'Classic and gourmet burgers with crispy fries. A true American classic!', image: 'burger' },
+            { id: 't7', name: 'Ocean Catch', cuisine: 'Seafood', status: 'Open Now', location: [33.8000, -80.8500], description: 'Fresh fried shrimp and fish tacos. Taste the ocean!', image: 'shrimp' },
+            { id: 't8', name: 'Pizza on Wheels', cuisine: 'Italian', status: 'Closed', location: [33.9500, -81.1000], description: 'Wood-fired pizzas made to order. Check our schedule for next event!', image: 'pizza' },
+            { id: 't9', name: 'Caffeine Fix', cuisine: 'Coffee', status: 'Open Now', location: [33.9200, -81.0700], description: 'Gourmet coffee and pastries to kickstart your day!', image: 'coffee' },
+            { id: 't10', name: 'The Sandwich Spot', cuisine: 'Sandwiches', status: 'Open Now', location: [33.9800, -81.0200], description: 'Artisan sandwiches with fresh ingredients. Lunch perfection!', image: 'burger' } /* Reusing burger icon for sandwich for simplicity */
+        ];
+
+        // SVG icon definitions for food trucks - these will be dynamically inserted
+        const truckIcons = {
+            taco: '<svg class="truck-icon" viewBox="0 0 24 24"><path d="M20 10h-2V7c0-1.1-.9-2-2-2h-3c-.55 0-1-.45-1-1s.45-1 1-1h3c2.21 0 4 1.79 4 4v3zm-4 0h-2V7c0-1.1-.9-2-2-2H9c-.55 0-1-.45-1-1s.45-1 1-1h3c2.21 0 4 1.79 4 4v3zm-8 0H6V7c0-1.1-.9-2-2-2H1c-.55 0-1-.45-1-1s.45-1 1-1h3c2.21 0 4 1.79 4 4v3zM12 20c-3.31 0-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8h-2c0 3.31-2.69 6-6 6zM12 10c-3.31 0-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8h-2c0 3.31-2.69 6-6 6z"/></svg>',
+            bbq: '<svg class="truck-icon" viewBox="0 0 24 24"><path d="M17 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM5 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm14-7H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>',
+            salad: '<svg class="truck-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9v-2h2v2zm4 0h-2v-2h2v2zm0-4h-2V7h2v2zM7 9h2V7H7v2zm0 4h2v-2H7v2zM5 11h2V9H5v2zm0 4h2v-2H5v2zm12 0h-2v-2h2v2zm0-4h-2V7h2v2zm-2 4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>',
+            noodles: '<svg class="truck-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9v-2h2v2zm4 0h-2v-2h2v2zm0-4h-2V7h2v2zM7 9h2V7H7v2zm0 4h2v-2H7v2zM5 11h2V9H5v2zm0 4h2v-2H5v2zm12 0h-2v-2h2v2zm0-4h-2V7h2v2zm-2 4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>',
+            icecream: '<svg class="truck-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9v-2h2v2zm4 0h-2v-2h2v2zm0-4h-2V7h2v2zM7 9h2V7H7v2zm0 4h2v-2H7v2zM5 11h2V9H5v2zm0 4h2v-2H5v2zm12 0h-2v-2h2v2zm0-4h-2V7h2v2zm-2 4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>',
+            burger: '<svg class="truck-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9v-2h2v2zm4 0h-2v-2h2v2zm0-4h-2V7h2v2zM7 9h2V7H7v2zm0 4h2v-2H7v2zM5 11h2V9H5v2zm0 4h2v-2H5v2zm12 0h-2v-2h2v2zm0-4h-2V7h2v2zm-2 4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>',
+            shrimp: '<svg class="truck-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9v-2h2v2zm4 0h-2v-2h2v2zm0-4h-2V7h2v2zM7 9h2V7H7v2zm0 4h2v-2H7v2zM5 11h2V9H5v2zm0 4h2v-2H5v2zm12 0h-2v-2h2v2zm0-4h-2V7h2v2zm-2 4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>',
+            pizza: '<svg class="truck-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9v-2h2v2zm4 0h-2v-2h2v2zm0-4h-2V7h2v2zM7 9h2V7H7v2zm0 4h2v-2H7v2zM5 11h2V9H5v2zm0 4h2v-2H5v2zm12 0h-2v-2h2v2zm0-4h-2V7h2v2zm-2 4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>',
+            coffee: '<svg class="truck-icon" viewBox="0 0 24 24"><path d="M18.5 3H6c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 15H7c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h10c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1zM12 7c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'
+        };
+
+
+        function createTruckCard(truck) {
+            const iconSvg = truckIcons[truck.image] || '<svg class="truck-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9v-2h2v2zm4 0h-2v-2h2v2zm0-4h-2V7h2v2zM7 9h2V7H7v2zm0 4h2v-2H7v2zM5 11h2V9H5v2zm0 4h2v-2H5v2zm12 0h-2v-2h2v2zm0-4h-2V7h2v2zm-2 4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>'; // Fallback to a generic icon
+
+            return `
+                <div class="truck-card glass-panel p-4 flex items-center space-x-4 cursor-pointer">
+                    <div class="flex-shrink-0 text-4xl">${iconSvg}</div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold text-white">${truck.name}</h3>
+                        <p class="text-gray-300 text-sm">${truck.cuisine} • <span class="${truck.status === 'Open Now' ? 'text-blue-400' : 'text-red-500'}">${truck.status}</span></p>
+                        <p class="text-gray-400 text-xs mt-1">${truck.description}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTrucks(filteredTrucks) {
+            const truckListContainer = document.getElementById('truckList');
+            truckListContainer.innerHTML = '';
+            if (map) {
+                markers.forEach(marker => map.removeLayer(marker));
+                markers = [];
+            }
+
+            filteredTrucks.forEach(truck => {
+                truckListContainer.innerHTML += createTruckCard(truck);
+
+                if (map) {
+                    // Create a custom icon for the map marker
+                    const customIcon = L.divIcon({
+                        className: 'custom-map-marker',
+                        html: `<div class="text-red-700 text-4xl">${truckIcons[truck.image] || '📍'}</div>`, // Use SVG or emoji
+                        iconSize: [40, 40], // Size of the icon
+                        iconAnchor: [20, 40], // Point of the icon which will correspond to marker's location
+                        popupAnchor: [0, -35] // Point from which the popup should open relative to the iconAnchor
+                    });
+
+                    const marker = L.marker(truck.location, { icon: customIcon }).addTo(map)
+                        .bindPopup(`<b>${truck.name}</b><br>${truck.cuisine}<br>${truck.status}`);
+                    markers.push(marker);
+                }
+            });
+        }
+
+        function initializeMapAndContent() {
+            // Check if L is defined, if not, retry. This is a robust check for external script loading.
+            if (typeof L === 'undefined') {
+                setTimeout(initializeMapAndContent, 100);
+                return;
+            }
+
+            map = L.map('map').setView([33.88, -81.00], 8);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+
+            renderTrucks(foodTrucksData);
+
+            const filterButtons = document.querySelectorAll('.filter-button');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    const cuisine = button.dataset.cuisine;
+                    let filtered = foodTrucksData;
+                    if (cuisine !== 'all') {
+                        filtered = foodTrucksData.filter(truck => truck.cuisine.toLowerCase() === cuisine);
+                    }
+                    renderTrucks(filtered);
+                });
+            });
+
+            map.invalidateSize();
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeMapAndContent);
+
+        window.onresize = function() {
+            if (map) {
+                map.invalidateSize();
+            }
+        };
+    </script>
+</body>
+</html>

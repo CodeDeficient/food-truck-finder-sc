@@ -1,0 +1,329 @@
+Product Requirements Document: SC Food Truck Finder
+1. Introduction & Executive Summary
+Project Name: SC Food Truck Finder
+Vision: To be the definitive, user-friendly, and visually engaging platform for discovering and tracking food trucks across South Carolina, providing accurate, near real-time availability, diverse cuisine details, and trustworthy ratings.
+Goal: To create a highly marketable, open-source web application that serves as a robust portfolio piece, showcasing advanced full-stack development, AI integration, data engineering, and debugging capabilities, leading to freelance opportunities and potential direct revenue.
+Target Audience:
+
+Primary Users: Individuals and families in South Carolina looking for food trucks.
+
+Secondary Users (Future): Food truck owners seeking visibility and management tools.
+Problem Solved: The difficulty in finding up-to-date locations and schedules for mobile food trucks, which often rely on disparate social media posts and event listings.
+
+2. Scope & Phases
+The project will be developed in distinct phases, starting with a Minimum Viable Product (MVP) and progressively adding features.
+
+2.1. Phase 1: Minimum Viable Product (MVP) - Vibe Code Focus
+Core Functionality: Enable users to find food trucks on a map and in a scrollable list, view basic details, and filter by cuisine.
+
+Data: Primarily manually entered or semi-automatically updated data for a small set of initial trucks.
+
+Purpose: Validate core UI/UX, establish technical architecture, and demonstrate initial AI-powered data parsing capabilities (even if not fully automated for all data).
+
+2.2. Phase 2: Post-Launch Enhancements (Iterative Development)
+Focus: Introduce automated data updates, user accounts, personalization, and enhanced discovery features.
+
+Purpose: Increase utility, user engagement, and showcase more complex system integrations.
+
+2.3. Phase 3: Advanced Features & Monetization (Future)
+Focus: Implement features for truck owners, advanced analytics, and potential direct revenue streams.
+
+Purpose: Explore long-term sustainability and expand market reach.
+
+3. High-Level User Stories
+As a Food Truck Enthusiast, I want to easily see which food trucks are active nearby today so I can plan my meal.
+
+As a Food Truck Enthusiast, I want to filter food trucks by cuisine type so I can find exactly what I'm craving.
+
+As a Food Truck Enthusiast, I want to view a specific truck's detailed schedule and location so I know where to find them in the future.
+
+As a Food Truck Enthusiast, I want to see trustworthy ratings for food trucks so I can make informed choices.
+
+As a Food Truck Enthusiast, I want to "favorite" trucks so I can quickly find them later.
+
+As a Food Truck Enthusiast, I want to receive notifications when my favorite trucks update their location or schedule so I don't miss them.
+
+As a Food Truck Enthusiast, I want to suggest new food trucks or report incorrect information so the app stays accurate.
+
+As an App Developer/Admin, I want an automated system to collect and parse food truck data from various online sources.
+
+As an App Developer/Admin, I want to monitor the accuracy of AI-parsed data and easily correct errors.
+
+4. Functional Requirements (Screen-by-Screen Breakdown)
+4.1. Main Finder Screen (Hybrid Map & List View)
+Purpose: Primary discovery interface.
+
+Elements:
+
+Header: App Title, Hamburger Menu icon (top-left), User Profile icon (top-right).
+
+Search Bar: Prominent, central input for searching truck names or keywords.
+
+Map View: Interactive map (Leaflet.js) displaying food truck pins.
+
+Scrollable List View: Below the map, a scrollable section displaying minimalist cards for each food truck.
+
+Each card: Truck Name, Primary Cuisine, Current Status (e.g., "Open Now at [Location]"), small engaging image/icon.
+
+Cards are clickable to navigate to Truck Detail Screen.
+
+Bottom Navigation Bar: Fixed at the bottom, consistent across screens (e.g., Map, List/Trucks, Favorites, Profile/Settings).
+
+4.2. Truck Detail Screen
+Purpose: Detailed information about a specific food truck.
+
+Elements:
+
+Truck Name (large, bold).
+
+Hero Image/Logo.
+
+Cuisine Tags (e.g., "Mexican", "BBQ").
+
+Current Status: Prominent display of "Open Now at [Address] until [Time]" or "Closed," with today's operating hours.
+
+Upcoming Schedule: Scrollable list of future locations, dates, and times.
+
+Ratings: Aggregated star rating (e.g., "4.5 / 5 stars") with a text hyperlink to "View Google Reviews" (initially direct link, later API-driven).
+
+Action Buttons: "Favorite" (heart/star icon), "View Menu" (external link), "Get Directions" (integrates with native map apps).
+
+Social Media Icons: Links to truck's official social media pages.
+
+Brief truck description.
+
+4.3. Search & Filter Options Screen (Modal Overlay)
+Purpose: Refine food truck search.
+
+Elements:
+
+Clear title ("Filters").
+
+Cuisine Type Filters (checkboxes/tags).
+
+Location Filters ("Near Me" toggle, City/Region dropdown for SC).
+
+"Open Now" Toggle.
+
+"Apply Filters" and "Clear All" buttons.
+
+4.4. User Profile / Favorites Screen
+Purpose: Manage user preferences and access favorited trucks.
+
+Elements:
+
+User's profile name/icon.
+
+Scrollable list of favorited food truck cards.
+
+"Notification Preferences" section (links to Notifications Settings Screen).
+
+Account management options (e.g., "Edit Profile", "Logout").
+
+4.5. Login / Sign-up Screen
+Purpose: User authentication.
+
+Elements:
+
+App logo/title.
+
+Email and Password input fields.
+
+"Login" button.
+
+"Sign Up" button (or toggle between states).
+
+"Forgot Password" link.
+
+Social Login options (e.g., Google icon).
+
+4.6. Onboarding / Welcome Screen(s)
+Purpose: Introduce app value to first-time users.
+
+Elements:
+
+Series of 2-3 distinct screens with pagination dots.
+
+Large, engaging illustration/icon per screen.
+
+Concise welcome message/key benefit.
+
+"Get Started" or "Next" button.
+
+Optional: Request location/notification permissions with explanation.
+
+4.7. Notifications Settings Screen
+Purpose: Granular control over notification preferences.
+
+Elements:
+
+Clear title ("Notifications").
+
+Toggles for Email, SMS, Mobile Push notifications.
+
+Options for frequency (e.g., "Immediate", "Daily Digest").
+
+Checkboxes for specific notification types (e.g., "Favorite truck location updates", "New trucks nearby").
+
+4.8. About / Legal Information Screen
+Purpose: Provide app information and legal disclosures.
+
+Elements:
+
+App logo/name.
+
+Brief "About Us" text.
+
+Clickable links for "Privacy Policy", "Terms of Service", "Contact Us".
+
+Credits/Attribution for data sources/APIs.
+
+4.9. Suggest a Truck / Report an Issue Screen
+Purpose: User contribution to data accuracy.
+
+Elements:
+
+Tabs or prominent buttons to switch between "Suggest New Truck" and "Report an Issue" forms.
+
+Suggest Form: Input fields for truck name, cuisine, website/social media links, optional "notes" text area, "Submit" button.
+
+Report Form: Dropdown to select existing truck, "Type of Issue" dropdown (e.g., "Location incorrect", "Schedule wrong"), text area for detailed description, "Submit" button.
+
+5. Non-Functional Requirements
+Performance: Fast loading times (<3 seconds), smooth map interactions, responsive data filtering.
+
+Scalability: Ability to handle increasing number of users and food trucks without significant performance degradation. Firebase's serverless architecture supports this.
+
+Security:
+
+Authentication & Authorization: Secure user login (Firebase Auth), role-based access control (for future Truck Owner Portal).
+
+Data Protection: Firestore security rules to protect data.
+
+API Key Management: All sensitive API keys (LLMs, external services) stored as environment variables, never client-side.
+
+Input Validation: Robust validation on all user and scraped inputs.
+
+HTTPS: Mandatory for all traffic.
+
+Reliability: Robust error handling for API calls, data scraping, and AI parsing. Automated retries for transient issues.
+
+Usability & Accessibility: Intuitive navigation, clear visual hierarchy, responsive design for all devices, adherence to basic accessibility standards (e.g., sufficient color contrast).
+
+Maintainability: Clean, well-commented codebase; modular architecture; consistent coding standards.
+
+Cost-Effectiveness: Prioritize free tiers and open-source solutions where possible to minimize operational costs.
+
+6. Technical Architecture & Stack
+Frontend:
+
+Framework: React (using Next.js for SSR/SSG benefits and efficient routing, or Vite + React for simpler SPA).
+
+Styling: Tailwind CSS for utility-first, responsive styling.
+
+Mapping: Leaflet.js (open-source, lightweight, flexible map library).
+
+Deployment: Vercel (for frontend hosting, leveraging its generous free tier and Next.js integration).
+
+Backend:
+
+Platform: Firebase (primary backend service provider).
+
+Serverless Logic: Firebase Functions (Node.js/TypeScript) for API endpoints, scheduled tasks (scraping, data processing), and backend logic.
+
+Database: Firestore (NoSQL document database for truck data, schedules, user favorites, notifications).
+
+Authentication: Firebase Authentication (for user management).
+
+AI/LLM Integration:
+
+Providers: Google Gemini (Primary), OpenAI (Fallback), Anthropic (or other LLMs as needed for specific tasks if Gemini/OpenAI are unsuitable).
+
+Purpose: Parsing unstructured social media/event text into structured data (location, time, date, event name).
+
+Output Format Testing: Rigorous testing of LLM output in both JSON and YAML formats to determine which provides higher syntax reliability and fewer parsing errors.
+
+Linter Feedback Loop: Implement a system where generated LLM output is immediately validated by a linter (e.g., JSON.parse() with schema validation, js-yaml parser). If validation fails, the error details are fed back to the LLM for a regeneration attempt, creating a self-correcting loop.
+
+External Integrations:
+
+Reviews: Initially, direct hyperlinks to Google Reviews. Future: API integration (e.g., Google Maps Platform, Yelp Fusion API) for aggregated ratings, with careful cost and terms-of-service evaluation.
+
+Email Notifications: Node.js library (e.g., Nodemailer) via Firebase Functions, integrated with a transactional email service (e.g., SendGrid, Mailgun - check free tiers).
+
+SMS/Push Notifications: Future integration with services like Twilio (SMS) or Firebase Cloud Messaging (FCM for push notifications).
+
+7. Data Strategy
+Data Sources: Public social media (Facebook, Instagram, Twitter posts/events), local event calendars, food truck association websites, individual truck websites/blogs.
+
+Ethical Scraping Practices: Adherence to robots.txt, strict rate limiting with delays, descriptive User-Agent strings, robust error handling with exponential backoff, focus on publicly accessible data, and promoting original sources.
+
+AI Parsing: LLMs will be prompted to extract structured data (date, time, location, event name) from unstructured text. Iterative prompt engineering is key.
+
+Scheduled Collection: Firebase Scheduled Functions will trigger scraping and parsing daily (or more frequently for specific, high-priority trucks).
+
+Data Verification: Initial manual verification. Post-launch, user submissions ("Suggest a Truck," "Report an Issue") and potentially AI-driven anomaly detection for scraped data.
+
+8. UI/UX Design Principles (Retro-Modern Fusion)
+Theme: "Fancy restaurant serving a fusion of all the foods the trucks make," with a distinct 50s "candy apple red" and subtle neon vibe on a black base.
+
+Color Palette:
+
+Primary Background: bg-gray-950 or bg-neutral-950 (deep charcoal black).
+
+Primary Text: text-white or text-gray-100 (crisp white).
+
+"Candy Apple" Accent: bg-red-700 (for buttons, active states) / text-red-700 (for headings, icons).
+
+Subtle Neon Accent: text-blue-400 or text-cyan-400 (for hover states, small interactive elements, subtle glows).
+
+Secondary Background/Pattern: bg-gray-900 or bg-neutral-900 (slightly lighter dark gray for texture/checkers).
+
+Layout: Mobile-first, intuitive navigation, clear visual hierarchy.
+
+Interactions: Smooth map panning/zooming, clear filter selections, easy access to truck details.
+
+Aesthetic Details: Generous rounded corners, subtle gradients for depth, clean typography (modern sans-serif for body, bolder for headings), subtle shadows for "backlit" effects, judicious use of checkerboard patterns.
+
+9. Development Workflow
+Phased Approach: Start with MVP, iterate in distinct phases.
+
+AI-Assisted Coding: Leverage web-assisted AI coding tools (e.g., Google Stitch, Magic Component Generations) for initial UI/UX and boilerplate code generation.
+
+Local Development & Debugging: Transition to local VS Code environment with Cline/GitHub Copilot for complex logic, data parsing, AI prompt engineering, and rigorous debugging.
+
+Iteration & Documentation: Build in small, testable increments. Document every significant decision, bug, and fix for debugging case studies.
+
+Version Control: Use Git and GitHub from day one for all code.
+
+Testing: Implement unit tests for critical logic (e.g., AI parsing validation) and integration tests for key user flows.
+
+10. Business Model & Profitability (for Daniel)
+Primary Profit Driver: The app serves as a live, open-source portfolio piece demonstrating advanced full-stack, AI integration, data engineering, and debugging skills. This is invaluable for securing higher-paying freelance contracts and full-time roles.
+
+Freelance Services: The project directly showcases capabilities for custom web app development, specialized data scraping/parsing services (using AI), and expert debugging services.
+
+Long-term Direct Revenue (Optional): If the app gains significant traction, explore premium truck listings, advertising, or data insights as potential revenue streams.
+
+11. Risks & Mitigations
+Scraping Blocks/Website Changes:
+
+Mitigation: Robust error handling, exponential backoff, robots.txt adherence, User-Agent rotation (if necessary, in future), and a "Report an Issue" feature for user-driven correction.
+
+AI Parsing Accuracy/Reliability:
+
+Mitigation: Iterative prompt engineering, YAML vs. JSON testing, linter feedback loop, human validation/fallback for uncertain outputs.
+
+API Costs (LLMs, Reviews):
+
+Mitigation: Leverage free tiers initially, monitor usage closely, optimize API calls, and defer costly integrations until necessary.
+
+User Adoption:
+
+Mitigation: Focus on strong UI/UX, accurate data, and a clear value proposition.
+
+Time Investment:
+
+Mitigation: Strict adherence to MVP scope, phased development, and leveraging AI coding tools for speed.
+
+This PRD provides a complete, structured plan for developing the SC Food Truck Finder, addressing all aspects from user experience to technical implementation and your personal profitability goals.
