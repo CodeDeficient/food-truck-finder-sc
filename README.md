@@ -10,7 +10,7 @@
 
 The SC Food Truck Finder is a web application designed to help users easily locate and get information about food trucks in South Carolina. The platform aims to solve the common problem of finding up-to-date food truck locations and schedules, which are often scattered across various social media platforms and event listings.
 
-This project emphasizes a "Retro-Modern Fusion" UI/UX theme, described as a "fancy restaurant serving a fusion of all the foods the trucks make," featuring a distinct 50s "candy apple red" and subtle neon vibe on a black base.
+The UI/UX theme is a "Retro-Modern Fusion," characterized by a dark base, vibrant "candy apple red" accents, and subtle neon highlights, aiming for a sleek and engaging visual experience.
 
 ## Key Features (MVP & Planned)
 
