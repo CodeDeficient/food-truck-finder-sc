@@ -1,0 +1,36 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny all access to any path not explicitly matched
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Allow public read access to 'trucks' collection and its documents
+    match /trucks/{truckId} {
+      allow get: if true; // Read individual document
+      allow list: if true; // List documents in collection (Note: list on a path like this is usually covered by collection group or parent collection rule)
+      allow write: if false; // No writes for MVP
+    }
+    // Explicit rule for the 'trucks' collection itself
+    match /trucks {
+      allow list: if true; // Allow listing documents in the 'trucks' collection
+      allow get: if false; // Deny get on the collection path itself (usually not a valid operation anyway)
+      allow write: if false; // Deny writes to collection directly
+    }
+
+    // Allow public read access to 'schedules' collection and its documents
+    match /schedules/{scheduleId} {
+      allow get: if true;
+      allow list: if true; // Similar note as for /trucks/{truckId}
+      allow write: if false;
+    }
+    // Explicit rule for the 'schedules' collection itself
+    match /schedules {
+      allow list: if true;
+      allow get: if false; // Deny get on the collection path itself
+      allow write: if false;
+    }
+  }
+}

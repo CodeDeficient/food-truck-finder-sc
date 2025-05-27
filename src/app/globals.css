@@ -1,0 +1,160 @@
+@import "leaflet/dist/leaflet.css"; /* Added Leaflet CSS */
+@import "tailwindcss";
+
+/* Original :root variables for light/dark mode - kept for reference or future use if a theme switcher is added.
+   The body styles below will currently override these for a default dark theme. */
+:root {
+  --background-light: #ffffff;
+  --foreground-light: #171717;
+  --background-dark: #0a0a0a; /* A very dark gray, close to brand-dark-gray-alt */
+  --foreground-dark: #f9fafb; /* brand-light-gray */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* You could refine dark mode specific variables here if needed, 
+       but the body style below sets a default dark theme. */
+  }
+}
+
+body {
+  /* font-family is handled by layout.tsx and tailwind.config.ts (Inter font) */
+  /* Overriding default background and color for the specific theme from index.html */
+  background: radial-gradient(circle at top left, theme('colors.brand-dark-gray') 0%, theme('colors.brand-black') 70%);
+  color: theme('colors.brand-light-gray');
+  min-height: 100vh; /* From original index.html body class */
+  /* display: flex; flex-direction: column; are handled by Next.js app structure or specific layout components */
+}
+
+/* Enhanced black metallic glassmorphism effect from index.html */
+.glass-panel {
+    background-color: rgba(5, 5, 5, 0.75); /* Even darker, slightly more opaque for solid metallic feel */
+    backdrop-filter: blur(30px) saturate(200%) brightness(120%); /* Stronger blur, saturation, and slight brightness for sheen */
+    -webkit-backdrop-filter: blur(30px) saturate(200%) brightness(120%); /* Safari support */
+    border: 1px solid rgba(255, 255, 255, 0.25); /* More visible, subtle white border for reflection */
+    box-shadow:
+        0 18px 70px 0 rgba(0, 0, 0, 0.95), /* Deeper outer shadow for floating effect */
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1), /* Subtle inner highlight */
+        inset 0 0 30px rgba(255, 255, 255, 0.03); /* Very subtle inner glow */
+    border-radius: 20px; /* Even more rounded for sleekness */
+    transition: all 0.3s ease-in-out; /* Smooth transitions for hover effects */
+    position: relative; /* Needed for pseudo-elements */
+    overflow: hidden; /* Ensure content respects border-radius for the panel itself */
+}
+
+.glass-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.08) 100%); /* More pronounced light streak */
+    pointer-events: none; /* Allow clicks to pass through */
+    z-index: -1; /* Behind content */
+    opacity: 0.8; /* Control visibility of the sheen */
+}
+
+/* Default glass-panel hover is subtle. Specific components might have more pronounced hover effects. */
+.glass-panel:hover {
+    box-shadow:
+        0 25px 80px 0 rgba(0, 0, 0, 1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 0 40px rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px); /* Slight lift on hover */
+}
+
+/* Custom Scrollbar Styling for Webkit browsers (Chrome, Edge, Safari) */
+/* Applied to elements with the class .scrollable-filters-container */
+.scrollable-filters-container::-webkit-scrollbar {
+    width: 8px; /* Width for vertical scrollbar */
+    height: 8px; /* Height for horizontal scrollbar */
+}
+
+.scrollable-filters-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.01); /* Even more subtle track */
+    border-radius: 10px;
+}
+
+.scrollable-filters-container::-webkit-scrollbar-thumb {
+    background: rgba(56, 178, 172, 0.4); /* Solid, but translucent brand-cyan for thumb */
+    border-radius: 10px;
+    border: none; /* Ensure no conflicting border */
+    box-shadow: none; /* Remove box-shadow from thumb itself to avoid conflicts */
+    transition: background 0.2s ease-in-out; /* Transition only background */
+}
+
+.scrollable-filters-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(56, 178, 172, 0.7); /* More opaque on hover for solid feel */
+}
+
+/* Styling for the .scrollable-filters-container element itself.
+   This is more component-specific, but included from original global styles.
+   Consider moving to a component-specific CSS module if this class is reused elsewhere with different layout needs. */
+.scrollable-filters-container {
+    overflow-x: auto;
+    padding-bottom: 30px; /* Increased padding to give more space below the buttons for their glow */
+    padding-top: 24px; /* Increased padding to the top of the scrollable container for button glow */
+    padding-left: 1rem; /* Add padding to the scrollable container itself */
+    padding-right: 1rem; /* Add padding to the scrollable container itself */
+    /* The margins below were to compensate for glass-panel's padding. 
+       This might need adjustment based on actual component structure. */
+    /* margin-left: -1rem;  */
+    /* margin-right: -1rem; */
+}
+
+/* Styles for icons used in the header */
+.header-icon {
+    fill: currentColor;
+    width: 1.75rem; /* Slightly larger for header */
+    height: 1.75rem;
+}
+
+/* Specific styling for the search input to match glassmorphism */
+.search-input {
+    background-color: rgba(30, 30, 30, 0.7); /* Slightly more opaque for input */
+    border: 2px solid theme('colors.brand-red');
+    color: theme('colors.brand-light-gray');
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6); /* Inner shadow for depth */
+}
+
+.search-input:focus {
+    border-color: theme('colors.brand-cyan');
+    /* Using Tailwind's theme() for focus ring color variable if possible, or direct value */
+    box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.6), inset 0 0 8px rgba(56, 178, 172, 0.4); /* subtle neon glow on focus */
+    outline: none; /* Ensure default focus outline is removed if custom is applied */
+}
+
+/* General SVG icon styling, used by bottom navigation */
+.svg-icon {
+    /* fill: currentColor; is set directly on SVG elements for clarity */
+    width: 1.5rem; /* Equivalent to w-6 in Tailwind */
+    height: 1.5rem; /* Equivalent to h-6 in Tailwind */
+}
+
+/* Custom box-shadow for active filter button */
+.filter-button-active-shadow {
+  box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.5), 0 0 20px rgba(56, 178, 172, 0.9);
+}
+
+/* Styles for Food Truck Cards */
+.truck-card {
+    /* Base transition is inherited from .glass-panel (all 0.3s). 
+       If more specific transitions are needed, they can be added here. */
+    /* Example: transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out; */
+}
+
+.truck-card:hover {
+    transform: translateY(-4px); /* Slightly more pronounced lift than default glass-panel */
+    /* Using theme() for colors where possible */
+    box-shadow: 0 0 35px hsla(theme('colors.brand-cyan / .9')), 0 0 20px hsla(theme('colors.brand-cyan / .7'));
+    border-color: theme('colors.brand-cyan'); 
+}
+
+/* Styles for Food Truck Icons (inside cards) */
+.truck-icon {
+    /* fill: currentColor; is set directly on SVG elements within the data structure */
+    width: 2.5rem; /* Equivalent to w-10 in Tailwind */
+    height: 2.5rem; /* Equivalent to h-10 in Tailwind */
+}
